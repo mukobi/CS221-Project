@@ -240,7 +240,7 @@ def run_experiment(input_dim, lr, num_epochs):
 
 # %%
 # run the experiment with 
-for input_dim in [32, 64, 128]:
+for input_dim in [325, 650, 1024]:
     for lr in [0.001, 0.0001, 0.00001]:
         num_epochs = 20
         run_experiment(input_dim, lr, num_epochs)
