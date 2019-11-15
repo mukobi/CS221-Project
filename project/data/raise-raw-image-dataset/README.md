@@ -20,7 +20,7 @@ In order to resize all the .TIF raw images to a resolution where the minimum dim
 magick mogrify -resize "650x650^" -format jpg -quality 80 *.TIF
 ```
 
-When this is finished (took __ minutes on an i5-2500K), you will notice ImageMagick also creates very-low resolution thumbnails suffixed "-1.jpg". We don't need them, so remove them with
+When this is finished, you will notice ImageMagick also creates very-low resolution thumbnails suffixed "-1.jpg". We don't need them, so remove them with
 
 ```bash
 rm -f *-1.jpg
