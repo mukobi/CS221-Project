@@ -102,17 +102,21 @@ def declare_model(input_dim):
             self.layer1 = nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2),  # (512, 512, 32) (256, 256, 32)
                 nn.ReLU(),
+                nn.BatchNorm2d(32),
                 nn.MaxPool2d(kernel_size=2, stride=2))  # (256, 256, 32)
             self.layer2 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # (256, 256, 64)
                 nn.ReLU(),
+                nn.BatchNorm2d(64),
                 nn.MaxPool2d(kernel_size=2, stride=2))  #  (128, 128, 64)
             self.layer3 = nn.Sequential(
                 nn.Conv2d(64, 128, kernel_size=5, stride=1, padding=2),  # (512, 512, 64)
                 nn.ReLU(),
+                nn.BatchNorm2d(128),
                 nn.MaxPool2d(kernel_size=2, stride=2))  #  (64, 64, 64)
     #         self.drop_out = nn.Dropout(0.1)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 8, 32)
+            self.do = nn.Dropout(0.2)
             self.fc2 = nn.Linear(32, 1)
             self.sigmoid = nn.Sigmoid()
             
@@ -129,6 +133,8 @@ def declare_model(input_dim):
     #         out = self.drop_out(out)
             out = self.fc1(out)
             # print (out.shape)
+            out = self.do(out)
+
             out = self.fc2(out)
             out = self.sigmoid(out)
             return out
