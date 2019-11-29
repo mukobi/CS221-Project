@@ -25,6 +25,9 @@ MODEL_NAME = 'CNN v1.1.0 new data'
 
 # %%
 # Config
+INPUT_DIM = 128
+LR = 0.0001
+NUM_EPOCHS = 20
 train_test_ratio = 0.8
 
 # Declare important file paths
@@ -83,6 +86,11 @@ def load_data_into_memory(data_loader):
         output.append((inputs, labels))
     return output
 
+def one_shot_data_generator(data_loader):
+    for data in data_loader:
+        inputs = data[0].to(device, non_blocking=True)
+        labels = data[1].to(device, non_blocking=True)
+        yield (inputs, labels)
 # %%
 # Declare our model architecture
 def declare_model(input_dim):
@@ -91,17 +99,20 @@ def declare_model(input_dim):
             super(ConvNet, self).__init__()
             self.layer1 = nn.Sequential(
                 nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2),  # (512, 512, 32) (256, 256, 32)
+                nn.BatchNorm2d(32),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2))  # (256, 256, 32)
             self.layer2 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # (256, 256, 64)
+                nn.BatchNorm2d(64),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2))  #  (128, 128, 64)
             self.layer3 = nn.Sequential(
                 nn.Conv2d(64, 128, kernel_size=5, stride=1, padding=2),  # (512, 512, 64)
+                nn.BatchNorm2d(128),
                 nn.ReLU(),
                 nn.MaxPool2d(kernel_size=2, stride=2))  #  (64, 64, 64)
-    #         self.drop_out = nn.Dropout(0.1)
+            self.drop_out = nn.Dropout(0.1)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 8, 32)
             self.fc2 = nn.Linear(32, 1)
             self.sigmoid = nn.Sigmoid()
@@ -118,6 +129,7 @@ def declare_model(input_dim):
             # print (out.shape)
     #         out = self.drop_out(out)
             out = self.fc1(out)
+            out = self.drop_out(out)
             # print (out.shape)
             out = self.fc2(out)
             out = self.sigmoid(out)
@@ -147,7 +159,7 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         # Train the model
         running_loss = 0.0
         train_correct = train_total = 0 
-        for i, (inputs, labels) in enumerate(load_data_into_memory(train_loader)):
+        for i, (inputs, labels) in enumerate(one_shot_data_generator(train_loader)):
             labels = labels.view(-1,1)
 
             probs = model(inputs)
@@ -169,7 +181,7 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         # Test current version of model to obtain accuracy    
         val_correct = val_total = 0 
         with torch.no_grad():
-            for (inputs, labels) in load_data_into_memory(val_loader):
+            for (inputs, labels) in one_shot_data_generator(val_loader):
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 labels = labels.view(-1,1)
@@ -229,9 +241,6 @@ def run_experiment(input_dim, lr, num_epochs):
 
 
 # %%
-# run the experiment with 
-for input_dim in [128]:
-    for lr in [0.0001]:
-        num_epochs = 20
-        time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(input_dim, lr, num_epochs)
+# run the experiment with
+time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(INPUT_DIM, LR, NUM_EPOCHS)
 
