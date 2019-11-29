@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.4.1 resize 4-conv more-dropout'
+MODEL_NAME = 'CNN v1.4.2 resize, dropout in convs'
 
 # Declare important file paths
 project_path = os.path.abspath('')
@@ -82,6 +82,7 @@ def obtain_data(input_dim):
 
 # %%
 # # Load data into memory to elimate read bottleneck
+# TODO this is called before every epoch so it's not useful. Refactor train_model to fix.
 def load_data_into_memory(data_loader):
     output = []
     for data in data_loader:
@@ -95,6 +96,8 @@ def one_shot_data_generator(data_loader):
         inputs = data[0].to(device, non_blocking=True)
         labels = data[1].to(device, non_blocking=True)
         yield (inputs, labels)
+
+
 # %%
 # Declare our model architecture
 def declare_model(input_dim):
@@ -105,23 +108,28 @@ def declare_model(input_dim):
                 nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
+                nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=2, stride=2))
             self.layer2 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=2),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
+                nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=2, stride=2))
             self.layer3 = nn.Sequential(
                 nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2),
                 nn.BatchNorm2d(128),
                 nn.ReLU(),
+                nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=2, stride=2))
             self.layer4 = nn.Sequential(
                 nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=2),
                 nn.BatchNorm2d(256),
                 nn.ReLU(),
+                nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=2, stride=2))
             self.drop_out = nn.Dropout(0.2)
+            # TODO this doesn't like intput_dim that aren't powers of 2 (e.g. 650)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
             self.drop_out = nn.Dropout(0.4)
             self.fc2 = nn.Linear(64, 1)
@@ -263,4 +271,3 @@ def run_experiment(input_dim, lr, num_epochs):
 # %%
 # run the experiment
 time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(INPUT_DIM, LR, NUM_EPOCHS)
-
