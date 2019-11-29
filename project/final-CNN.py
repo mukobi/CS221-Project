@@ -20,14 +20,14 @@ warnings.filterwarnings("ignore", category = FutureWarning)
 # %%
 # Flags
 DISABLE_CUDA = False
-MODEL_NAME = 'CNN v1.1.0 new data'
+MODEL_NAME = 'CNN v1.2.0 regularization random crop'
 
 
 # %%
 # Config
 INPUT_DIM = 128
-LR = 0.0001
-NUM_EPOCHS = 20
+LR = 0.00001
+NUM_EPOCHS = 8
 train_test_ratio = 0.8
 
 # Declare important file paths
@@ -53,7 +53,7 @@ device, using_cuda = get_default_device()
 def obtain_data(input_dim):
     # Transform the data
     transform = transforms.Compose([
-                        transforms.Resize((input_dim, input_dim)),
+                        transforms.RandomCrop((input_dim, input_dim)),
                         transforms.ToTensor(),
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
@@ -230,10 +230,10 @@ def run_experiment(input_dim, lr, num_epochs):
     loss_fn = torch.nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr = lr)
 
-    time_list, loss_list, train_accuracy_list, val_accuracy_list = train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs=num_epochs)
-
-    results_filename = "experiments/chkpt 1 ~ dim={}, lr={}, epochs={}, cuda={}.csv".format(input_dim, lr, num_epochs, using_cuda)
+    results_filename = 'experiments/' + MODEL_NAME + ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(input_dim, lr, num_epochs, using_cuda)
     print(results_filename)
+
+    time_list, loss_list, train_accuracy_list, val_accuracy_list = train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs=num_epochs)
     results_dict = {"time (m)": time_list, "loss": loss_list, "train accuracy": train_accuracy_list, "val accuracy": val_accuracy_list}
     write_experiment_results_to_file(results_filename, results_dict)
 
@@ -241,6 +241,6 @@ def run_experiment(input_dim, lr, num_epochs):
 
 
 # %%
-# run the experiment with
+# run the experiment
 time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(INPUT_DIM, LR, NUM_EPOCHS)
 
