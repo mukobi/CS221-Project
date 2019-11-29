@@ -14,7 +14,7 @@ import csv
 import os
 import time
 import warnings
-warnings.filterwarnings("ignore", category = FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # %%
@@ -25,9 +25,10 @@ MODEL_NAME = 'CNN v1.2.0 regularization random crop'
 
 # %%
 # Config
-INPUT_DIM = 128
-LR = 0.00001
-NUM_EPOCHS = 8
+INPUT_DIM = 32
+LR = 0.0001
+NUM_EPOCHS = 1
+MAX_NUM_IMAGES_PER_DATASET = 1000
 train_test_ratio = 0.8
 
 # Declare important file paths
@@ -71,10 +72,6 @@ def obtain_data(input_dim):
 
     return train_loader, val_loader
 
-    # train_data_in_memory = load_data_into_memory(train_loader)
-    # val_data_in_memory = load_data_into_memory(val_loader)
-    # return train_data_in_memory, val_data_in_memory 
-
 
 # %%
 # # Load data into memory to elimate read bottleneck
@@ -87,7 +84,8 @@ def load_data_into_memory(data_loader):
     return output
 
 def one_shot_data_generator(data_loader):
-    for data in data_loader:
+    for i, data in enumerate(data_loader):
+        if i > MAX_NUM_IMAGES_PER_DATASET: return
         inputs = data[0].to(device, non_blocking=True)
         labels = data[1].to(device, non_blocking=True)
         yield (inputs, labels)
@@ -127,7 +125,6 @@ def declare_model(input_dim):
             # print (out.shape)
             out = out.reshape(out.size(0), -1)
             # print (out.shape)
-    #         out = self.drop_out(out)
             out = self.fc1(out)
             out = self.drop_out(out)
             # print (out.shape)
@@ -226,7 +223,7 @@ def run_experiment(input_dim, lr, num_epochs):
     train_loader, val_loader = obtain_data(input_dim)
 
     model = declare_model(input_dim)
-    # Define the loss function and optimizer
+    
     loss_fn = torch.nn.BCELoss()
     optimizer = optim.Adam(model.parameters(), lr = lr)
 
