@@ -10,6 +10,7 @@ import torchvision
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
 
+import argparse
 import csv
 import os
 import time
@@ -24,11 +25,18 @@ MODEL_NAME = 'CNN v1.2.0 regularization random crop'
 
 
 # %%
-# Config
-INPUT_DIM = 32
-LR = 0.0001
-NUM_EPOCHS = 1
-MAX_NUM_IMAGES_PER_DATASET = 1000
+# Hyperparameters
+parser = argparse.ArgumentParser()
+parser.add_argument("--dim")
+parser.add_argument("--lr")
+parser.add_argument("--epochs")
+parser.add_argument("--datasetsize")
+args = parser.parse_args()
+
+INPUT_DIM = int(args.dim) if args.dim else 128
+LR = float(args.lr) if args.lr else 0.0001
+NUM_EPOCHS = int(args.epochs) if args.epochs else 12
+MAX_NUM_IMAGES_PER_DATASET = int(args.datasetsize) if args.datasetsize else 1832 # size of level design dataset
 train_test_ratio = 0.8
 
 # Declare important file paths
@@ -85,7 +93,6 @@ def load_data_into_memory(data_loader):
 
 def one_shot_data_generator(data_loader):
     for i, data in enumerate(data_loader):
-        if i > MAX_NUM_IMAGES_PER_DATASET: return
         inputs = data[0].to(device, non_blocking=True)
         labels = data[1].to(device, non_blocking=True)
         yield (inputs, labels)
@@ -157,6 +164,8 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         running_loss = 0.0
         train_correct = train_total = 0 
         for i, (inputs, labels) in enumerate(one_shot_data_generator(train_loader)):
+            if i > MAX_NUM_IMAGES_PER_DATASET: break
+
             labels = labels.view(-1,1)
 
             probs = model(inputs)
@@ -179,8 +188,6 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         val_correct = val_total = 0 
         with torch.no_grad():
             for (inputs, labels) in one_shot_data_generator(val_loader):
-                inputs = inputs.to(device)
-                labels = labels.to(device)
                 labels = labels.view(-1,1)
 
                 probs = model(inputs)
