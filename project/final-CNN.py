@@ -14,30 +14,29 @@ import argparse
 import csv
 import os
 import time
-import warnings
-warnings.filterwarnings("ignore", category=FutureWarning)
+# import warnings
+# warnings.filterwarnings("ignore", category=FutureWarning)
 
 
 # %%
-# Flags
-DISABLE_CUDA = False
-MODEL_NAME = 'CNN v1.3.0 regularization resize'
-
-
-# %%
-# Hyperparameters
+# Hyperparameters and config
 parser = argparse.ArgumentParser()
 parser.add_argument("--dim")
 parser.add_argument("--lr")
 parser.add_argument("--epochs")
-parser.add_argument("--datasetsize")
+parser.add_argument("--debug", action='store_true')
+parser.add_argument("--disablecuda", action='store_true')
 args = parser.parse_args()
 
 INPUT_DIM = int(args.dim) if args.dim else 128
 LR = float(args.lr) if args.lr else 0.0001
 NUM_EPOCHS = int(args.epochs) if args.epochs else 12
-MAX_NUM_IMAGES_PER_DATASET = int(args.datasetsize) if args.datasetsize else 1832  # size of smaller dataset
+DEBUG = args.debug
+MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
+
+DISABLE_CUDA = args.disablecuda
+MODEL_NAME = 'CNN v1.4.1 resize 4-conv more-dropout'
 
 # Declare important file paths
 project_path = os.path.abspath('')
@@ -53,7 +52,7 @@ def get_default_device():
         print("Running on CUDA!")
         return torch.device('cuda'), True
     else:
-        print("Running on CPU!")
+        print("Running on CPU ;(")
         return torch.device('cpu'), False
 device, using_cuda = get_default_device()
 
@@ -103,39 +102,56 @@ def declare_model(input_dim):
         def __init__(self):
             super(ConvNet, self).__init__()
             self.layer1 = nn.Sequential(
-                nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2),  # (512, 512, 32) (256, 256, 32)
+                nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=2),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2))  # (256, 256, 32)
+                nn.MaxPool2d(kernel_size=2, stride=2))
             self.layer2 = nn.Sequential(
-                nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2),  # (256, 256, 64)
+                nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=2),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2))  #  (128, 128, 64)
+                nn.MaxPool2d(kernel_size=2, stride=2))
             self.layer3 = nn.Sequential(
-                nn.Conv2d(64, 128, kernel_size=5, stride=1, padding=2),  # (512, 512, 64)
+                nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2),
                 nn.BatchNorm2d(128),
                 nn.ReLU(),
-                nn.MaxPool2d(kernel_size=2, stride=2))  #  (64, 64, 64)
-            self.drop_out = nn.Dropout(0.1)
-            self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 8, 32)
-            self.fc2 = nn.Linear(32, 1)
+                nn.MaxPool2d(kernel_size=2, stride=2))
+            self.layer4 = nn.Sequential(
+                nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=2),
+                nn.BatchNorm2d(256),
+                nn.ReLU(),
+                nn.MaxPool2d(kernel_size=2, stride=2))
+            self.drop_out = nn.Dropout(0.2)
+            self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
+            self.drop_out = nn.Dropout(0.4)
+            self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
             
         def forward(self, x):
-            # print (x.shape)
+            if DEBUG:
+                print (x.shape)
             out = self.layer1(x)
-            # print (out.shape)
+            if DEBUG:
+                print (out.shape)
             out = self.layer2(out)
-            # print (out.shape)
+            if DEBUG:
+                print (out.shape)
             out = self.layer3(out)
-            # print (out.shape)
+            if DEBUG:
+                print (out.shape)
+            out = self.layer4(out)
+            if DEBUG:
+                print (out.shape)
             out = out.reshape(out.size(0), -1)
-            # print (out.shape)
+            if DEBUG:
+                print (out.shape)
             out = self.fc1(out)
             out = self.drop_out(out)
-            # print (out.shape)
+            if DEBUG:
+                print(out.shape)
             out = self.fc2(out)
+            if DEBUG:
+                print(out.shape)
             out = self.sigmoid(out)
             return out
 
