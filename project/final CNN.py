@@ -20,20 +20,17 @@ warnings.filterwarnings("ignore", category = FutureWarning)
 # %%
 # Flags
 DISABLE_CUDA = False
-
-NOTEBOOK_NAME = 'CNN v1.0.0 new dataset'
+MODEL_NAME = 'CNN v1.1.0 new data'
 
 
 # %%
-# Hyperparameters
-INPUT_DIM = 128
-LR = 0.0001
+# Config
 train_test_ratio = 0.8
 
 # Declare important file paths
 project_path = os.path.abspath('')
 data_path = project_path + '/data/ldrd-and-raise-datasets/image-folder'
-model_path = project_path + '/models/' + NOTEBOOK_NAME + '-model.pth'
+model_path = project_path + '/models/' + MODEL_NAME + '-model.pth'
 
 
 # %%
@@ -85,7 +82,6 @@ def load_data_into_memory(data_loader):
         labels = data[1].to(device, non_blocking=True)
         output.append((inputs, labels))
     return output
-
 
 # %%
 # Declare our model architecture
