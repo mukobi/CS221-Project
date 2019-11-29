@@ -151,7 +151,7 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
     train_accuracy_list = []
     val_accuracy_list = []
     t = torch.Tensor([0.5]).to(device)  # 0.5 acts as threshold
-    # highest_acc = 0.0
+    highest_acc = 0.0
 
     torch.backends.cudnn.benchmark = True  # make training faster on Cuda
 
@@ -196,9 +196,9 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
                 val_correct += (outputs == labels.float()).float().sum() / len(outputs)  # normalize batch size
         val_accuracy = val_correct / val_total
 
-        # if val_accuracy > highest_acc:  # save highest accuracy model
-        #     highest_acc = val_accuracy
-        #     torch.save(model.state_dict(), model_path)
+        if val_accuracy > highest_acc:  # save highest accuracy model
+            highest_acc = val_accuracy
+            torch.save(model.state_dict(), model_path)
 
         elapsed_time = (time.time() - start_time)/60
         time_list.append(elapsed_time)
