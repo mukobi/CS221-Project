@@ -21,7 +21,7 @@ warnings.filterwarnings("ignore", category=FutureWarning)
 # %%
 # Flags
 DISABLE_CUDA = False
-MODEL_NAME = 'CNN v1.2.0 regularization random crop'
+MODEL_NAME = 'CNN v1.3.0 regularization resize'
 
 
 # %%
@@ -36,7 +36,7 @@ args = parser.parse_args()
 INPUT_DIM = int(args.dim) if args.dim else 128
 LR = float(args.lr) if args.lr else 0.0001
 NUM_EPOCHS = int(args.epochs) if args.epochs else 12
-MAX_NUM_IMAGES_PER_DATASET = int(args.datasetsize) if args.datasetsize else 1832 # size of level design dataset
+MAX_NUM_IMAGES_PER_DATASET = int(args.datasetsize) if args.datasetsize else 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 # Declare important file paths
@@ -62,7 +62,7 @@ device, using_cuda = get_default_device()
 def obtain_data(input_dim):
     # Transform the data
     transform = transforms.Compose([
-                        transforms.RandomCrop((input_dim, input_dim)),
+                        transforms.Resize((input_dim, input_dim)),
                         transforms.ToTensor(),
                         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
