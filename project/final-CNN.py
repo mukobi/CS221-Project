@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.7.1 resize only, fewer filters'
+MODEL_NAME = 'CNN v1.8.0 resize, avg pool final conv'
 
 
 # %%
@@ -135,7 +135,7 @@ def declare_model(input_dim):
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=5, stride=2))
+                nn.AvgPool2d(kernel_size=5, stride=2))
             self.drop_out_1 = nn.Dropout(0.2)
             # TODO this doesn't like intput_dim that aren't divisible by 16 (e.g. 650)
             self.fc1 = nn.Linear(int(input_dim/16) * int(input_dim/16) * 4, 64)
