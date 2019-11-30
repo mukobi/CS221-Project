@@ -36,7 +36,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.4.0 run on all data each epoch'
+MODEL_NAME = 'CNN v2.5.0 max pool all last conv'
 
 
 # %%
@@ -135,10 +135,10 @@ def declare_model(input_dim):
                 nn.BatchNorm2d(256),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=5, stride=2))
+                nn.MaxPool2d(kernel_size=int(input_dim/16), stride=2))
             self.drop_out_1 = nn.Dropout(0.5)
             # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
-            self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
+            self.fc1 = nn.Linear(256, 64)
             self.drop_out_2 = nn.Dropout(0.5)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
