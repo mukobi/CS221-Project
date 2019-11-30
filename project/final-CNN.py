@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.9.0 resize, avg pool all layers'
+MODEL_NAME = 'CNN v2.0.0 resize, more filters, maxpool all'
 
 
 # %%
@@ -113,32 +113,32 @@ def declare_model(input_dim):
         def __init__(self):
             super(ConvNet, self).__init__()
             self.layer1 = nn.Sequential(
-                nn.Conv2d(3, 8, kernel_size=5, stride=1, padding=4),
-                nn.BatchNorm2d(8),
-                nn.ReLU(),
-                nn.Dropout(0.1),
-                nn.AvgPool2d(kernel_size=5, stride=2))
-            self.layer2 = nn.Sequential(
-                nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=4),
-                nn.BatchNorm2d(16),
-                nn.ReLU(),
-                nn.Dropout(0.1),
-                nn.AvgPool2d(kernel_size=5, stride=2))
-            self.layer3 = nn.Sequential(
-                nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=6),
+                nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.AvgPool2d(kernel_size=5, stride=2))
-            self.layer4 = nn.Sequential(
-                nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=6),
+                nn.MaxPool2d(kernel_size=5, stride=2))
+            self.layer2 = nn.Sequential(
+                nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.AvgPool2d(kernel_size=5, stride=2))
+                nn.MaxPool2d(kernel_size=5, stride=2))
+            self.layer3 = nn.Sequential(
+                nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=6),
+                nn.BatchNorm2d(128),
+                nn.ReLU(),
+                nn.Dropout(0.1),
+                nn.MaxPool2d(kernel_size=5, stride=2))
+            self.layer4 = nn.Sequential(
+                nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=6),
+                nn.BatchNorm2d(256),
+                nn.ReLU(),
+                nn.Dropout(0.1),
+                nn.MaxPool2d(kernel_size=5, stride=2))
             self.drop_out_1 = nn.Dropout(0.2)
-            # TODO this doesn't like intput_dim that aren't divisible by 16 (e.g. 650)
-            self.fc1 = nn.Linear(int(input_dim/16) * int(input_dim/16) * 4, 64)
+            # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
+            self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
             self.drop_out_2 = nn.Dropout(0.4)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
