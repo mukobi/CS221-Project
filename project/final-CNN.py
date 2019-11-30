@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.4.2 resize, dropout in convs'
+MODEL_NAME = 'CNN v1.5.0 resize fix dropout'
 
 
 # %%
@@ -132,35 +132,36 @@ def declare_model(input_dim):
                 nn.ReLU(),
                 nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=2, stride=2))
-            self.drop_out = nn.Dropout(0.2)
-            # TODO this doesn't like intput_dim that aren't powers of 2 (e.g. 650)
+            self.drop_out_1 = nn.Dropout(0.2)
+            # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
-            self.drop_out = nn.Dropout(0.4)
+            self.drop_out_2 = nn.Dropout(0.4)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
             
         def forward(self, x):
             if DEBUG:
-                print (x.shape)
+                print(x.shape)
             out = self.layer1(x)
             if DEBUG:
-                print (out.shape)
+                print(out.shape)
             out = self.layer2(out)
             if DEBUG:
-                print (out.shape)
+                print(out.shape)
             out = self.layer3(out)
             if DEBUG:
-                print (out.shape)
+                print(out.shape)
             out = self.layer4(out)
             if DEBUG:
-                print (out.shape)
+                print(out.shape)
             out = out.reshape(out.size(0), -1)
             if DEBUG:
                 print (out.shape)
+            out = self.drop_out_1(out)
             out = self.fc1(out)
-            out = self.drop_out(out)
             if DEBUG:
                 print(out.shape)
+            out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
