@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.7.0 resize, fewer filters'
+MODEL_NAME = 'CNN v1.7.0 resize+crop, fewer filters'
 
 
 # %%
@@ -49,6 +49,8 @@ def get_default_device():
     else:
         print("Running on CPU ;(")
         return torch.device('cpu'), False
+
+
 device, using_cuda = get_default_device()
 
 
@@ -65,10 +67,10 @@ model_path = project_path + '/models/' + MODEL_NAME + \
 def obtain_data(input_dim):
     # Transform the data
     transform = transforms.Compose([
-                        transforms.Resize(input_dim),  # resize preserving aspect ratio
-                        transforms.CenterCrop((input_dim, input_dim)),  # crop to square
-                        transforms.ToTensor(),
-                        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+        transforms.Resize(input_dim),  # resize preserving aspect ratio
+        transforms.CenterCrop((input_dim, input_dim)),  # crop to square
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
 
     # Create training/testing dataloaders
@@ -76,7 +78,8 @@ def obtain_data(input_dim):
     train_size = int(train_test_ratio * len(full_set))
     val_size = int((len(full_set) - train_size) / 2)
     test_size = len(full_set) - train_size - val_size
-    train_set, val_set, test_set = torch.utils.data.random_split(full_set, [train_size, val_size, test_size])
+    train_set, val_set, test_set = torch.utils.data.random_split(
+        full_set, [train_size, val_size, test_size])
 
     train_loader = torch.utils.data.DataLoader(train_set, shuffle=True)
     val_loader = torch.utils.data.DataLoader(val_set, shuffle=False)
@@ -95,6 +98,7 @@ def load_data_into_memory(data_loader):
         labels = data[1].to(device, non_blocking=True)
         output.append((inputs, labels))
     return output
+
 
 def one_shot_data_generator(data_loader):
     for i, data in enumerate(data_loader):
@@ -139,7 +143,7 @@ def declare_model(input_dim):
             self.drop_out_2 = nn.Dropout(0.4)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
-            
+
         def forward(self, x):
             if DEBUG:
                 print(x.shape)
@@ -186,42 +190,47 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
     start_time = time.time()
 
     model.train()  # switch to train mode
-        
+
     for epoch in range(num_epochs):
         # Train the model
         running_loss = 0.0
-        train_correct = train_total = 0 
+        train_correct = train_total = 0
         for i, (inputs, labels) in enumerate(one_shot_data_generator(train_loader)):
-            if i > MAX_NUM_IMAGES_PER_DATASET: break
+            if i > MAX_NUM_IMAGES_PER_DATASET:
+                break
 
-            labels = labels.view(-1,1)
+            labels = labels.view(-1, 1)
 
             probs = model(inputs)
 
             outputs = (probs > t).float() * 1  # obtain train accuracies
             train_total += len(outputs)
-            train_correct += (outputs == labels.float()).float().sum() / len(outputs)  # normalize batch size
+            # normalize batch size
+            train_correct += (outputs == labels.float()
+                              ).float().sum() / len(outputs)
 
             loss = loss_fn(probs, labels.float())
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
             running_loss += loss.item()
-            
+
             # if (i + 1) % 10 == 0:
             #     print ('# Images: {:} | Time (m): {:.3f} | Loss: {:.6f} '.format(i + 1, (time.time() - start_time)/60, running_loss / (i + 1)))
         train_accuracy = train_correct / train_total
-            
-        # Test current version of model to obtain accuracy    
-        val_correct = val_total = 0 
+
+        # Test current version of model to obtain accuracy
+        val_correct = val_total = 0
         with torch.no_grad():
             for (inputs, labels) in one_shot_data_generator(val_loader):
-                labels = labels.view(-1,1)
+                labels = labels.view(-1, 1)
 
                 probs = model(inputs)
                 outputs = (probs > t).float() * 1
                 val_total += len(outputs)
-                val_correct += (outputs == labels.float()).float().sum() / len(outputs)  # normalize batch size
+                # normalize batch size
+                val_correct += (outputs == labels.float()
+                                ).float().sum() / len(outputs)
         val_accuracy = val_correct / val_total
 
         if val_accuracy > highest_acc:  # save highest accuracy model
@@ -233,7 +242,7 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         loss_list.append(running_loss)
         train_accuracy_list.append(train_accuracy)
         val_accuracy_list.append(val_accuracy)
-        print ('Epoch: {:} | Time (m): {:.6f} | Loss: {:.6f} | Train Accuracy: {:.8%} | Validation Accuracy: {:.8%}'.format(
+        print('Epoch: {:} | Time (m): {:.6f} | Loss: {:.6f} | Train Accuracy: {:.8%} | Validation Accuracy: {:.8%}'.format(
             epoch, elapsed_time, running_loss, train_accuracy, val_accuracy))
 
     return time_list, loss_list, train_accuracy_list, val_accuracy_list
@@ -258,15 +267,19 @@ def run_experiment(input_dim, lr, num_epochs):
     train_loader, val_loader = obtain_data(input_dim)
 
     model = declare_model(input_dim)
-    
-    loss_fn = torch.nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr = lr)
 
-    results_filename = 'experiments/' + MODEL_NAME + ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(input_dim, lr, num_epochs, using_cuda)
+    loss_fn = torch.nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    results_filename = 'experiments/' + MODEL_NAME + \
+        ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(
+            input_dim, lr, num_epochs, using_cuda)
     print(results_filename)
 
-    time_list, loss_list, train_accuracy_list, val_accuracy_list = train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs=num_epochs)
-    results_dict = {"time (m)": time_list, "loss": loss_list, "train accuracy": train_accuracy_list, "val accuracy": val_accuracy_list}
+    time_list, loss_list, train_accuracy_list, val_accuracy_list = train_model(
+        model, loss_fn, optimizer, train_loader, val_loader, num_epochs=num_epochs)
+    results_dict = {"time (m)": time_list, "loss": loss_list,
+                    "train accuracy": train_accuracy_list, "val accuracy": val_accuracy_list}
     write_experiment_results_to_file(results_filename, results_dict)
 
     return time_list, loss_list, train_accuracy_list, val_accuracy_list
@@ -274,4 +287,5 @@ def run_experiment(input_dim, lr, num_epochs):
 
 # %%
 # run the experiment
-time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(INPUT_DIM, LR, NUM_EPOCHS)
+time_list, loss_list, train_accuracy_list, val_accuracy_list = run_experiment(
+    INPUT_DIM, LR, NUM_EPOCHS)
