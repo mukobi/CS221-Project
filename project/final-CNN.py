@@ -36,7 +36,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.5.0 max pool all last conv'
+MODEL_NAME = 'CNN v2.6.0 fix model train eval switching'
 
 
 # %%
@@ -190,10 +190,10 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
 
     start_time = time.time()
 
-    model.train()  # switch to train mode
-
     for epoch in range(num_epochs):
         # Train the model
+        model.train()  # switch to train mode
+
         running_loss = 0.0
         train_correct = train_total = 0
         for i, (inputs, labels) in enumerate(one_shot_data_generator(train_loader)):
@@ -221,6 +221,7 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         train_accuracy = train_correct / train_total
 
         # Test current version of model to obtain accuracy
+        model.eval()  # switch to evaluation mode
         val_correct = val_total = 0
         with torch.no_grad():
             for (inputs, labels) in one_shot_data_generator(val_loader):
