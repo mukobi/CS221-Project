@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.7.0 resize+crop, fewer filters'
+MODEL_NAME = 'CNN v1.7.1 resize only, fewer filters'
 
 
 # %%
@@ -67,8 +67,7 @@ model_path = project_path + '/models/' + MODEL_NAME + \
 def obtain_data(input_dim):
     # Transform the data
     transform = transforms.Compose([
-        transforms.Resize(input_dim),  # resize preserving aspect ratio
-        transforms.CenterCrop((input_dim, input_dim)),  # crop to square
+        transforms.Resize((input_dim, input_dim)),  # resize to square
         transforms.ToTensor(),
         transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
     ])
