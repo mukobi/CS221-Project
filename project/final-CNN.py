@@ -32,11 +32,11 @@ INPUT_DIM = int(args.dim) if args.dim else 128
 LR = float(args.lr) if args.lr else 0.0001
 NUM_EPOCHS = int(args.epochs) if args.epochs else 12
 DEBUG = args.debug
-MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
+# MAX_NUM_IMAGES_PER_DATASET = 3664  # 2 x size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.3.0 fc dropout=0.5'
+MODEL_NAME = 'CNN v2.4.0 run on all data each epoch'
 
 
 # %%
@@ -197,8 +197,8 @@ def train_model(model, loss_fn, optimizer, train_loader, val_loader, num_epochs)
         running_loss = 0.0
         train_correct = train_total = 0
         for i, (inputs, labels) in enumerate(one_shot_data_generator(train_loader)):
-            if i > MAX_NUM_IMAGES_PER_DATASET:
-                break
+            # if i > MAX_NUM_IMAGES_PER_DATASET:
+            #     break
 
             labels = labels.view(-1, 1)
 
