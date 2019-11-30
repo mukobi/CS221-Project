@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.1.1 no conv dropout'
+MODEL_NAME = 'CNN v2.2.0 no dropout at all'
 
 
 # %%
@@ -159,11 +159,11 @@ def declare_model(input_dim):
             if DEBUG:
                 print(out.shape)
             out = out.reshape(out.size(0), -1)
-            out = self.drop_out_1(out)
+            # out = self.drop_out_1(out)
             out = self.fc1(out)
             if DEBUG:
                 print(out.shape)
-            out = self.drop_out_2(out)
+            # out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
