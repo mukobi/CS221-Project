@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.0.0 resize, more filters, maxpool all'
+MODEL_NAME = 'CNN v2.1.0 no fc dropout'
 
 
 # %%
@@ -136,10 +136,10 @@ def declare_model(input_dim):
                 nn.ReLU(),
                 nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=5, stride=2))
-            self.drop_out_1 = nn.Dropout(0.2)
+            self.drop_out_1 = nn.Dropout(0.)
             # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
-            self.drop_out_2 = nn.Dropout(0.4)
+            self.drop_out_2 = nn.Dropout(0.)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
 
@@ -159,11 +159,11 @@ def declare_model(input_dim):
             if DEBUG:
                 print(out.shape)
             out = out.reshape(out.size(0), -1)
-            out = self.drop_out_1(out)
+            # out = self.drop_out_1(out)
             out = self.fc1(out)
             if DEBUG:
                 print(out.shape)
-            out = self.drop_out_2(out)
+            # out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
