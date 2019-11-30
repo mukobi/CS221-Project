@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.1.0 no fc dropout'
+MODEL_NAME = 'CNN v2.1.1 no conv dropout'
 
 
 # %%
@@ -116,30 +116,30 @@ def declare_model(input_dim):
                 nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                nn.Dropout(0.),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer2 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                nn.Dropout(0.),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer3 = nn.Sequential(
                 nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(128),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                nn.Dropout(0.),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer4 = nn.Sequential(
                 nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(256),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                nn.Dropout(0.),
                 nn.MaxPool2d(kernel_size=5, stride=2))
-            self.drop_out_1 = nn.Dropout(0.)
+            self.drop_out_1 = nn.Dropout(0.2)
             # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
             self.fc1 = nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64)
-            self.drop_out_2 = nn.Dropout(0.)
+            self.drop_out_2 = nn.Dropout(0.4)
             self.fc2 = nn.Linear(64, 1)
             self.sigmoid = nn.Sigmoid()
 
@@ -159,11 +159,11 @@ def declare_model(input_dim):
             if DEBUG:
                 print(out.shape)
             out = out.reshape(out.size(0), -1)
-            # out = self.drop_out_1(out)
+            out = self.drop_out_1(out)
             out = self.fc1(out)
             if DEBUG:
                 print(out.shape)
-            # out = self.drop_out_2(out)
+            out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
