@@ -38,11 +38,6 @@ train_test_ratio = 0.8
 DISABLE_CUDA = args.disablecuda
 MODEL_NAME = 'CNN v1.4.2 resize, dropout in convs'
 
-# Declare important file paths
-project_path = os.path.abspath('')
-data_path = project_path + '/data/ldrd-and-raise-datasets/image-folder'
-model_path = project_path + '/models/' + MODEL_NAME + '-model.pth'
-
 
 # %%
 # Select accelerator device
@@ -55,6 +50,15 @@ def get_default_device():
         print("Running on CPU ;(")
         return torch.device('cpu'), False
 device, using_cuda = get_default_device()
+
+
+# %%
+# Declare important file paths
+project_path = os.path.abspath('')
+data_path = project_path + '/data/ldrd-and-raise-datasets/image-folder'
+model_path = project_path + '/models/' + MODEL_NAME + \
+    ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(
+        INPUT_DIM, LR, NUM_EPOCHS, using_cuda) + '-model.pth'
 
 
 # %%
