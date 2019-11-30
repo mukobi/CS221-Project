@@ -36,7 +36,7 @@ MAX_NUM_IMAGES_PER_DATASET = 1832  # size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v1.8.0 resize, avg pool final conv'
+MODEL_NAME = 'CNN v1.9.0 resize, avg pool all layers'
 
 
 # %%
@@ -117,19 +117,19 @@ def declare_model(input_dim):
                 nn.BatchNorm2d(8),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=5, stride=2))
+                nn.AvgPool2d(kernel_size=5, stride=2))
             self.layer2 = nn.Sequential(
                 nn.Conv2d(8, 16, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(16),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=5, stride=2))
+                nn.AvgPool2d(kernel_size=5, stride=2))
             self.layer3 = nn.Sequential(
                 nn.Conv2d(16, 32, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
                 nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=5, stride=2))
+                nn.AvgPool2d(kernel_size=5, stride=2))
             self.layer4 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(64),
