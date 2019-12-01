@@ -29,7 +29,7 @@ parser.add_argument("--debug", action='store_true')
 parser.add_argument("--disablecuda", action='store_true')
 args = parser.parse_args()
 
-INPUT_DIM = int(args.dim) if args.dim else 128
+INPUT_DIM = int(args.dim) if args.dim else 256
 LR = float(args.lr) if args.lr else 0.0001
 NUM_EPOCHS = int(args.epochs) if args.epochs else 21
 L2 = float(args.l2) if args.l2 else 0.0
@@ -38,8 +38,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = "CNN v3.0.0 final model"
-
+MODEL_NAME = "CNN v3.0.1 final higher-dim"
 
 # %%
 # Select accelerator device
