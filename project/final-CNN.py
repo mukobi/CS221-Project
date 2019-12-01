@@ -24,19 +24,21 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--dim")
 parser.add_argument("--lr")
 parser.add_argument("--epochs")
+parser.add_argument("--l2")
 parser.add_argument("--debug", action='store_true')
 parser.add_argument("--disablecuda", action='store_true')
 args = parser.parse_args()
 
 INPUT_DIM = int(args.dim) if args.dim else 128
 LR = float(args.lr) if args.lr else 0.0001
-NUM_EPOCHS = int(args.epochs) if args.epochs else 12
+NUM_EPOCHS = int(args.epochs) if args.epochs else 21
+L2 = float(args.l2) if args.l2 else 0.0
 DEBUG = args.debug
 # MAX_NUM_IMAGES_PER_DATASET = 3664  # 2 x size of smaller dataset
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = "CNN v2.9.0 L2-reg=0.1"
+MODEL_NAME = "CNN v3.0.0 final model"
 
 
 # %%
@@ -59,8 +61,8 @@ device, using_cuda = get_default_device()
 project_path = os.path.abspath('')
 data_path = project_path + '/data/ldrd-and-raise-datasets/image-folder'
 model_path = project_path + '/models/' + MODEL_NAME + \
-    ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(
-        INPUT_DIM, LR, NUM_EPOCHS, using_cuda) + '-model.pth'
+    ' ~ dim={}, lr={}, epochs={}, l2={}, cuda={}.csv'.format(
+        INPUT_DIM, LR, NUM_EPOCHS, L2, using_cuda) + '-model.pth'
 
 
 # %%
@@ -135,10 +137,10 @@ def declare_model(input_dim):
                 nn.BatchNorm2d(256),
                 nn.ReLU(),
                 # nn.Dropout(0.1),
-                nn.MaxPool2d(kernel_size=int(input_dim/16), stride=2))
-            # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
+                nn.MaxPool2d(kernel_size=5, stride=2))
+            # TODO this doesn't like input_dim that aren't divisible by 8 (e.g. 650)
             self.fc1 = nn.Sequential(
-                nn.Linear(256, 64),
+                nn.Linear(int(input_dim/8) * int(input_dim/8) * 4, 64),
                 # nn.Dropout(0.5),
                 nn.ReLU())
             self.fc2 = nn.Sequential(
@@ -271,11 +273,11 @@ def run_experiment(input_dim, lr, num_epochs):
     model = declare_model(input_dim)
 
     loss_fn = torch.nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.1)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=L2)
 
     results_filename = 'experiments/' + MODEL_NAME + \
-        ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(
-            input_dim, lr, num_epochs, using_cuda)
+        ' ~ dim={}, lr={}, epochs={}, l2={}, cuda={}.csv'.format(
+            input_dim, lr, num_epochs, L2, using_cuda)
     print(results_filename)
 
     time_list, loss_list, train_accuracy_list, val_accuracy_list = train_model(
