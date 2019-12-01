@@ -36,7 +36,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = "CNN v2.8.1 Don't call model.eval()"
+MODEL_NAME = "CNN v2.9.0 L2-reg=0.1"
 
 
 # %%
@@ -271,7 +271,7 @@ def run_experiment(input_dim, lr, num_epochs):
     model = declare_model(input_dim)
 
     loss_fn = torch.nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=lr)
+    optimizer = optim.Adam(model.parameters(), lr=lr, weight_decay=0.1)
 
     results_filename = 'experiments/' + MODEL_NAME + \
         ' ~ dim={}, lr={}, epochs={}, cuda={}.csv'.format(
