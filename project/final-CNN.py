@@ -36,7 +36,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.6.0 fix model train eval switching'
+MODEL_NAME = 'CNN v2.7.0 back to no dropout'
 
 
 # %%
@@ -116,25 +116,25 @@ def declare_model(input_dim):
                 nn.Conv2d(3, 32, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(32),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                # nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer2 = nn.Sequential(
                 nn.Conv2d(32, 64, kernel_size=5, stride=1, padding=4),
                 nn.BatchNorm2d(64),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                # nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer3 = nn.Sequential(
                 nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(128),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                # nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=5, stride=2))
             self.layer4 = nn.Sequential(
                 nn.Conv2d(128, 256, kernel_size=5, stride=2, padding=6),
                 nn.BatchNorm2d(256),
                 nn.ReLU(),
-                nn.Dropout(0.1),
+                # nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=int(input_dim/16), stride=2))
             self.drop_out_1 = nn.Dropout(0.5)
             # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
@@ -161,11 +161,11 @@ def declare_model(input_dim):
             out = out.reshape(out.size(0), -1)
             if DEBUG:
                 print(out.shape)
-            out = self.drop_out_1(out)
+            # out = self.drop_out_1(out)
             out = self.fc1(out)
             if DEBUG:
                 print(out.shape)
-            out = self.drop_out_2(out)
+            # out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
