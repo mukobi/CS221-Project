@@ -36,7 +36,7 @@ DEBUG = args.debug
 train_test_ratio = 0.8
 
 DISABLE_CUDA = args.disablecuda
-MODEL_NAME = 'CNN v2.7.0 back to no dropout'
+MODEL_NAME = 'CNN v2.8.0 ReLU after fc1'
 
 
 # %%
@@ -136,12 +136,15 @@ def declare_model(input_dim):
                 nn.ReLU(),
                 # nn.Dropout(0.1),
                 nn.MaxPool2d(kernel_size=int(input_dim/16), stride=2))
-            self.drop_out_1 = nn.Dropout(0.5)
             # TODO this doesn't like intput_dim that aren't divisible by 8 (e.g. 650)
-            self.fc1 = nn.Linear(256, 64)
-            self.drop_out_2 = nn.Dropout(0.5)
-            self.fc2 = nn.Linear(64, 1)
-            self.sigmoid = nn.Sigmoid()
+            self.fc1 = nn.Sequential(
+                nn.Linear(256, 64),
+                # nn.Dropout(0.5),
+                nn.ReLU())
+            self.fc2 = nn.Sequential(
+                nn.Linear(64, 1),
+                # nn.Dropout(0.5),
+                nn.Sigmoid())
 
         def forward(self, x):
             if DEBUG:
@@ -161,15 +164,12 @@ def declare_model(input_dim):
             out = out.reshape(out.size(0), -1)
             if DEBUG:
                 print(out.shape)
-            # out = self.drop_out_1(out)
             out = self.fc1(out)
             if DEBUG:
                 print(out.shape)
-            # out = self.drop_out_2(out)
             out = self.fc2(out)
             if DEBUG:
                 print(out.shape)
-            out = self.sigmoid(out)
             return out
 
     model = ConvNet()
