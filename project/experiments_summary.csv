@@ -1,5 +1,5 @@
 experiment name,time (m),loss,train accuracy,val accuracy
-"Best model - CNN v3.0.1 final higher-dim (take 2) ~ dim=256, lr=0.0001, epochs=21, l2=0.0, cuda=True.csv",129.335506,21.607291,99.83686805,96.08355165
+"Best model - CNN v3.0.1 final higher-dim (take 2) ~ dim=256, lr=0.0001, epochs=21, l2=0.0, cuda=True.csv",129.335506,21.607291,.9983686805,.9608355165
 "chkpt 1 ~ dim=128, lr=0.0001, epochs=20, cuda=True.csv",17.337026250362396,50.93387096197917,0.983593761920929,0.768750011920929
 "chkpt 1 ~ dim=128, lr=0.001, epochs=20, cuda=True.csv",0.9539642055829366,1007.1282778338505,0.5132812857627869,0.5
 "chkpt 1 ~ dim=128, lr=1e-05, epochs=20, cuda=True.csv",18.109123392899832,616.0697482465766,0.7750000357627869,0.762499988079071
