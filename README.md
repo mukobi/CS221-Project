@@ -4,7 +4,7 @@ Detection of photorealistic CGI from photographic images
 
 ## Documents
 
-You can find compiled documentation of this research project in the [documents](documents/) folder. This included a project proposal, a mid-progress report, a final poster, and a research paper.
+You can find compiled documentation of this research project in the [documents](documents/) folder. This included a [project proposal](documents/0.%20proposal.pdf), a [mid-progress report](documents/1.%20progress-report.pdf), a [final poster](documents/2.%20poster.pdf), and a [final research paper](documents/3.%20final-paper.pdf).
 
 ## Project
 
