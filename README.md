@@ -16,5 +16,5 @@ The [project/data](project/data) folder contains the datasets we used along with
 
 This project was made by
 
-* **Shawn Zhang** - Stanford University '22 - *Initial work* - [shawnbzhang](https://github.com/shawnbzhang)
-* **Gabriel Mukobi** - Stanford University '22 - *Initial work* - [mukobi](https://github.com/mukobi)
+- **Shawn Zhang** - Stanford University '22 - _Initial work_ - [shawnbzhang](https://github.com/shawnbzhang)
+- **Gabriel Mukobi** - Stanford University '22 - _Initial work_ - [mukobi](https://github.com/mukobi)
